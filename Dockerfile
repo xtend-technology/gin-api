@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.16-alpine
+FROM golang:1.16-alpine AS build
 
 WORKDIR /app
 
@@ -10,8 +10,17 @@ RUN go mod download
 
 COPY *.go ./
 
+#Stops windows? error
+ENV CGO_ENABLED=0
+
 RUN go build -o /gin-hello
+
+FROM scratch AS bin
+
+WORKDIR /
+
+COPY --from=build /gin-hello /gin-hello
 
 EXPOSE 8080
 
-CMD [ "/gin-hello" ]
+ENTRYPOINT [ "/gin-hello" ]
